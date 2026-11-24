@@ -4,6 +4,7 @@ module M2Load
     SECTION_MARK = /\A@@(\w+)\s*\z/.freeze
     CPU_USAGE = /CPU usage: ([\d.]+)% user, ([\d.]+)% sys/.freeze
     TOP_HEADER = /\A\s*PID\s+%CPU/.freeze
+    TOP_SELF = /\Aself (\d+)\z/.freeze
     TOP_PROCESS = /\A\s*(\d+)\s+([\d.]+)\s*(.*?)\s*\z/.freeze
     PS_PROCESS = /\A\s*(\d+)\s+(\d+)\s(.*?)\s*\z/.freeze
     PAGE_SIZE = /page size of (\d+) bytes/.freeze
@@ -65,10 +66,15 @@ module M2Load
       raise Snapshot::Incomplete, "no top processes" unless last_header
 
       rows = @sections["top"].drop(last_header + 1).map { |line| line.match(TOP_PROCESS) }.compact
-      rows.first(TOP_COUNT).map do |row|
+      rows.reject { |row| Integer(row[1]) == sampling_top_pid }.first(TOP_COUNT).map do |row|
         pid = Integer(row[1])
         Snapshot::Process.new(process_name(pid, row[3]), pid, Float(row[2]))
       end
+    end
+
+    def sampling_top_pid
+      line = @sections["top"].find { |candidate| candidate.match?(TOP_SELF) }
+      line && Integer(line.match(TOP_SELF)[1])
     end
 
     def process_name(pid, top_name)

@@ -1,5 +1,6 @@
 Last login: Tue Nov 24 20:00:00 2026
 @@top
+self 98000
 Processes: 740 total, 4 running, 736 sleeping, 4129 threads 
 2026/11/24 20:55:21
 Load Avg: 2.82, 2.32, 2.20 
@@ -32,6 +33,7 @@ PID    %CPU COMMAND
 52106  97.5 com.apple.Virtua
 51344  32.8 ruby            
 52086  18.2 limactl         
+98000  7.0  top             
 141    16.3 2.1.331         
 0      15.2 kernel_task     
 @@vm_stat

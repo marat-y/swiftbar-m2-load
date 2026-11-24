@@ -44,6 +44,11 @@ class SnapshotTest < Minitest::Test
     assert_equal "claude", snapshot.top_cpu[3].name
   end
 
+  def test_top_cpu_leaves_out_the_top_that_took_the_sample
+    refute_includes snapshot.top_cpu.map(&:pid), 98_000
+    assert_equal 5, snapshot.top_cpu.size
+  end
+
   def test_top_cpu_falls_back_to_the_top_name_for_a_process_ps_did_not_list
     assert_equal "kernel_task", snapshot.top_cpu.last.name
   end
