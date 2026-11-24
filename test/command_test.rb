@@ -26,4 +26,32 @@ class CommandTest < Minitest::Test
     refute result.success
     refute_empty result.stderr
   end
+
+  def test_a_command_ignoring_term_is_killed_without_noise
+    result = nil
+    _, errors = capture_io { result = M2Load::Command.run(["/bin/sh", "-c", "trap '' TERM; /bin/sleep 30"], 0.2) }
+    assert result.timed_out
+    assert_equal "", errors
+  end
+
+  def test_timeout_kills_the_whole_process_group
+    Dir.mktmpdir do |dir|
+      pid_file = File.join(dir, "pid")
+      M2Load::Command.run(["/bin/sh", "-c", "/bin/sleep 30 & echo $! > #{pid_file}; wait"], 0.3)
+      grandchild = Integer(File.read(pid_file))
+      assert gone?(grandchild), "grandchild #{grandchild} survived"
+    end
+  end
+
+  private
+
+  def gone?(pid)
+    20.times do
+      Process.kill(0, pid)
+      sleep 0.05
+    end
+    false
+  rescue Errno::ESRCH
+    true
+  end
 end

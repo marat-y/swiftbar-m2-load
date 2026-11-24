@@ -3,7 +3,7 @@ module M2Load
     SEPARATOR = "---".freeze
     UNAVAILABLE_COLOR = "#8e8e93".freeze
     PRESSURE_COLORS = { warning: "orange", critical: "red" }.freeze
-    PROCESS_FONT = "font=Menlo size=12".freeze
+    PROCESS_FONT = "font=Menlo size=12 trim=false".freeze
     REFRESH = "Refresh | refresh=true".freeze
     NAME_LIMIT = 40
     VALUE_WIDTH = 6
@@ -73,7 +73,7 @@ module M2Load
     end
 
     def self.plain(text)
-      text.to_s.gsub(/[[:cntrl:]]+/, " ").tr("|", "¦").strip
+      M2Load.utf8(text).gsub(/[[:cntrl:]]+/, " ").tr("|", "¦").strip
     end
   end
 end

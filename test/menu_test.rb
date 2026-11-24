@@ -40,8 +40,8 @@ class MenuTest < Minitest::Test
     menu = reachable
     cpu = menu.index("Top CPU")
     memory = menu.index("Top memory")
-    assert_match(/\A 97\.5%  com\.apple\.Virtualization\.VirtualMachine \| font=Menlo size=12\z/, menu[cpu + 1])
-    assert_match(/\A1\.4 GB  com\.apple\.Virtualization\.VirtualMachine \| font=Menlo size=12\z/, menu[memory + 1])
+    assert_match(/\A 97\.5%  com\.apple\.Virtualization\.VirtualMachine \| font=Menlo size=12 trim=false\z/, menu[cpu + 1])
+    assert_match(/\A1\.4 GB  com\.apple\.Virtualization\.VirtualMachine \| font=Menlo size=12 trim=false\z/, menu[memory + 1])
     assert_match(/\A527 MB  claude \|/, menu[memory + 2])
     assert_equal 5, menu[(memory + 1)..-1].take_while { |line| line != "---" }.size
   end
@@ -49,7 +49,7 @@ class MenuTest < Minitest::Test
   def test_process_names_cannot_break_swiftbar_parameters
     text = FIXTURE.sub("Google Chrome Helper (Renderer)", "evil | color=red").sub("61000 401408", "61000 9401408")
     line = reachable(text).find { |candidate| candidate.include?("evil") }
-    assert_match(/\A9\.0 GB  evil ¦ color=red \| font=Menlo size=12\z/, line)
+    assert_match(/\A9\.0 GB  evil ¦ color=red \| font=Menlo size=12 trim=false\z/, line)
   end
 
   def test_long_process_names_are_shortened
@@ -85,5 +85,10 @@ class MenuTest < Minitest::Test
   def test_unavailable_reason_cannot_break_swiftbar_parameters
     menu = lines(M2Load::Menu.unavailable("M2", "bad | bash=/bin/rm", nil, NOW))
     assert_includes menu, "bad ¦ bash=/bin/rm"
+  end
+
+  def test_non_ascii_label_from_a_us_ascii_environment
+    label = "М2".b.force_encoding(Encoding::US_ASCII)
+    assert_equal "М2 — | color=#8e8e93", lines(M2Load::Menu.unavailable(label, "x", nil, NOW)).first
   end
 end

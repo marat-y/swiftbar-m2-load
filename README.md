@@ -43,14 +43,21 @@ Requires macOS with SwiftBar on this Mac and Remote Login (ssh) on the other one
 
 ## Settings
 
-Environment variables, for another Mac or label:
+Two environment variables change the Mac and the label:
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `M2_LOAD_HOST` | `m2` | ssh host (an alias from `~/.ssh/config` or `user@host`). |
 | `M2_LOAD_LABEL` | `M2` | Text in front of the numbers. |
 
-The time the Mac was last seen is kept in `last_seen` in SwiftBar's plugin data folder.
+SwiftBar has no place to set them, so put a small wrapper into the plugin folder instead of the link, for example `studio-load.15s.sh`:
+
+```sh
+#!/bin/sh
+M2_LOAD_HOST=studio M2_LOAD_LABEL=S exec "$HOME/swiftbar-m2-load/m2-load.15s.rb"
+```
+
+Make it executable; several wrappers show several Macs. The time a Mac was last seen is kept in `last_seen` in SwiftBar's data folder of each plugin.
 
 ## Development
 

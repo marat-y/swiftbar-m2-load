@@ -53,5 +53,20 @@ class ProbeTest < Minitest::Test
     error = assert_raises(M2Load::Unavailable) { probe_answering(result(stdout: fixture_without("ps"))).snapshot }
     assert_equal "Incomplete answer from m2", error.message
   end
-end
 
+  def test_process_names_are_listed_in_utf8
+    probe_answering(result(stdout: FIXTURE)).snapshot
+    assert_match(/LC_ALL=en_US.UTF-8 ps -Aceo/, @calls.first.first.last)
+  end
+
+  def test_non_ascii_noise_in_a_us_ascii_locale_is_ignored
+    noisy = ("Привет\n" + FIXTURE).b.force_encoding(Encoding::US_ASCII)
+    assert_equal 10, probe_answering(result(stdout: noisy)).snapshot.cores
+  end
+
+  def test_non_ascii_ssh_error_reads_as_utf8
+    stderr = "ssh: Не удалось\n".b.force_encoding(Encoding::US_ASCII)
+    error = assert_raises(M2Load::Unavailable) { probe_answering(result(success: false, stderr: stderr)).snapshot }
+    assert_equal "ssh: Не удалось", error.message
+  end
+end

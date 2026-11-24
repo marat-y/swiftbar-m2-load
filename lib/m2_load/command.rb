@@ -11,6 +11,7 @@ module M2Load
         next Result.new(waiter.value.success?, output.value, errors.value, false) if waiter.join(timeout)
 
         stop(waiter)
+        [output, errors].each { |reader| reader.join(GRACE_SECONDS) }
         Result.new(false, "", "", true)
       end
     rescue SystemCallError => error
