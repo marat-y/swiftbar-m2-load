@@ -1,0 +1,77 @@
+Last login: Tue Nov 24 20:00:00 2026
+@@top
+Processes: 740 total, 4 running, 736 sleeping, 4129 threads 
+2026/11/24 20:55:21
+Load Avg: 2.82, 2.32, 2.20 
+CPU usage: 16.61% user, 22.80% sys, 60.58% idle 
+SharedLibs: 464M resident, 112M data, 102M linkedit.
+MemRegions: 334199 total, 5277M resident, 99M private, 2132M shared.
+PhysMem: 15G used (1806M wired, 3980M compressor), 127M unused.
+VM: 362T vsize, 57G framework vsize, 111499(0) swapins, 353761(0) swapouts.
+Networks: packets: 797615059/225G in, 776565922/195G out.
+Disks: 128314455/1562G read, 144234620/1935G written.
+
+PID    %CPU COMMAND      
+99911  0.0  calaccessd   
+99898  0.0  donotdisturbd
+99033  0.0  syncdefaultsd
+98910  0.0  modelcatalogd
+98909  0.0  parsecd      
+Processes: 740 total, 3 running, 737 sleeping, 4142 threads 
+2026/11/24 20:55:22
+Load Avg: 2.84, 2.33, 2.20 
+CPU usage: 14.53% user, 8.42% sys, 77.3% idle 
+SharedLibs: 464M resident, 112M data, 102M linkedit.
+MemRegions: 0 total, 0B resident, 99M private, 2132M shared.
+PhysMem: 15G used (1806M wired, 3977M compressor), 120M unused.
+VM: 362T vsize, 57G framework vsize, 111499(0) swapins, 353761(0) swapouts.
+Networks: packets: 797619228/225G in, 776570057/195G out.
+Disks: 128314468/1562G read, 144235504/1935G written.
+
+PID    %CPU COMMAND         
+52106  97.5 com.apple.Virtua
+51344  32.8 ruby            
+52086  18.2 limactl         
+141    16.3 2.1.331         
+0      15.2 kernel_task     
+@@vm_stat
+Mach Virtual Memory Statistics: (page size of 16384 bytes)
+Pages free:                                     4802.
+Pages active:                                 317581.
+Pages inactive:                               313513.
+Pages speculative:                              3032.
+Pages throttled:                                   0.
+Pages wired down:                             115561.
+Pages purgeable:                                1214.
+"Translation faults":                     4769231688.
+Pages copy-on-write:                       539775113.
+Pages zero filled:                        1290044414.
+Pages reactivated:                         284729959.
+Pages purged:                                6383520.
+File-backed pages:                            213539.
+Anonymous pages:                              420587.
+Pages stored in compressor:                   578785.
+Pages occupied by compressor:                 254498.
+Decompressions:                            185730914.
+Compressions:                              206514705.
+Pageins:                                   103952920.
+Pageouts:                                      35868.
+Swapins:                                      111499.
+Swapouts:                                     353761.
+@@sysctl
+hw.memsize: 17179869184
+hw.ncpu: 10
+vm.loadavg: { 2.84 2.33 2.20 }
+vm.swapusage: total = 4096.00M  used = 2490.38M  free = 1605.62M  (encrypted)
+kern.memorystatus_vm_pressure_level: 1
+@@ps
+    1  17264 launchd
+  141 520352 claude
+  339  14896 logd
+23617 470304 claude
+51344 526144 ruby
+52086  98304 limactl
+52106 1465408 com.apple.Virtualization.VirtualMachine
+59503 540096 claude
+61000 401408 Google Chrome Helper (Renderer)
+61001  12288 claude-helper
