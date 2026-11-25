@@ -4,17 +4,18 @@ module M2Load
     DEFAULT_LABEL = "M2".freeze
     DEFAULT_DATA_DIR = File.join(Dir.home, "Library", "Application Support", "swiftbar-m2-load").freeze
 
-    def initialize(environment: ENV, output: $stdout, now: Time.now, command: Command.method(:run))
+    def initialize(environment: ENV, output: $stdout, now: Time.now, command: Command.method(:run), widget: Widget.method(:render))
       @environment = environment
       @output = output
       @now = now
       @command = command
+      @widget = widget
     end
 
     def run
       snapshot = Probe.new(host: host, command: @command).snapshot
       last_seen.write(@now)
-      @output.print(Menu.reachable(label, snapshot))
+      @output.print(Menu.reachable(label, snapshot, @widget))
       0
     rescue Unavailable => error
       unavailable(error.message)
@@ -25,7 +26,7 @@ module M2Load
     private
 
     def unavailable(reason)
-      @output.print(Menu.unavailable(label, reason, last_seen.read, @now))
+      @output.print(Menu.unavailable(label, reason, last_seen.read, @now, @widget))
       0
     end
 

@@ -10,10 +10,13 @@ module M2Load
     GIBIBYTE = 1024.0**3
     MEBIBYTE = 1024.0**2
     AGE_UNITS = [[86_400, "d"], [3600, "h"], [60, "min"], [1, "s"]].freeze
+    NO_VALUE = "—".freeze
 
-    def self.reachable(label, snapshot)
+    def self.reachable(label, snapshot, widget)
+      cpu = "#{snapshot.cpu_percent.round}%"
+      memory = "#{snapshot.memory_percent.round}%"
       [
-        "#{plain(label)} #{snapshot.cpu_percent.round}% · #{snapshot.memory_percent.round}%",
+        title(widget, blocks(label, cpu, memory), false) || "#{plain(label)} #{cpu} · #{memory}",
         SEPARATOR,
         "CPU #{snapshot.cpu_percent.round}% · user #{format('%.1f', snapshot.cpu_user)}% · system #{format('%.1f', snapshot.cpu_system)}%",
         "Load average #{snapshot.load_average.map { |value| format('%.2f', value) }.join(' · ')} · #{snapshot.cores} cores",
@@ -32,9 +35,9 @@ module M2Load
       ].join("\n") + "\n"
     end
 
-    def self.unavailable(label, reason, last_seen_at, now)
+    def self.unavailable(label, reason, last_seen_at, now, widget)
       [
-        "#{plain(label)} — | color=#{UNAVAILABLE_COLOR}",
+        title(widget, blocks(label, NO_VALUE, NO_VALUE), true) || "#{plain(label)} #{NO_VALUE} | color=#{UNAVAILABLE_COLOR}",
         SEPARATOR,
         "#{plain(label)} is unavailable",
         plain(reason),
@@ -42,6 +45,15 @@ module M2Load
         SEPARATOR,
         REFRESH,
       ].join("\n") + "\n"
+    end
+
+    def self.blocks(label, cpu, memory)
+      [["#{plain(label)} CPU", cpu], ["#{plain(label)} RAM", memory]]
+    end
+
+    def self.title(widget, blocks, dimmed)
+      image = widget.call(blocks, dimmed)
+      "| templateImage=#{image}" if image
     end
 
     def self.last_seen(time, now)

@@ -1,12 +1,13 @@
 # swiftbar-m2-load
 
-A [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin that shows the load of another Mac in the menu bar, the way [Stats](https://github.com/exelban/stats) shows the load of this one:
+A [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin that shows the load of another Mac in the menu bar, the way the "mini" widgets of [Stats](https://github.com/exelban/stats) show the load of this one — a small caption over each value:
 
 ```
-M2 23% · 75%
+M2 CPU  M2 RAM
+ 23%     75%
 ```
 
-The first number is CPU usage (user + system), the second is memory used. Both are fetched over ssh every 15 seconds.
+CPU is usage (user + system), RAM is memory used. Both are fetched over ssh every 15 seconds.
 
 The dropdown has the details:
 
@@ -15,7 +16,7 @@ The dropdown has the details:
 - the number of running `claude` processes (Claude Code sessions);
 - the five processes using the most CPU and the five using the most memory.
 
-When the Mac cannot be reached (asleep, off the network, ssh refused), the title turns into a grey `M2 —` and the dropdown says why and when the Mac was last seen.
+When the Mac cannot be reached (asleep, off the network, ssh refused), the values turn into a grey `—` and the dropdown says why and when the Mac was last seen.
 
 ## How the numbers are taken
 
@@ -25,6 +26,8 @@ One `ssh` call per refresh runs `top`, `vm_stat`, `sysctl` and `ps` on the other
 - Memory used is counted the way Stats counts it, so the numbers match: active + inactive + speculative + wired + compressed − purgeable − file-backed pages, out of `hw.memsize`.
 - Top CPU comes from the same `top` sample (its own `top` process is left out); process names come from `ps`.
 - Top memory is by resident size from `ps`.
+
+SwiftBar titles are one line, so the two-line title is drawn as an image: `osascript` runs `lib/m2_load/widget.js`, which draws the text with AppKit in the system font, with the sizes of Stats' mini widget. The image is a template, so macOS colours it for a light or dark menu bar. Each block is as wide as `100%`, so the item does not jump as values change. If drawing fails, the title falls back to text: `M2 23% · 75%`, or a grey `M2 —`.
 
 ## Install
 
@@ -48,7 +51,7 @@ Two environment variables change the Mac and the label:
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `M2_LOAD_HOST` | `m2` | ssh host (an alias from `~/.ssh/config` or `user@host`). |
-| `M2_LOAD_LABEL` | `M2` | Text in front of the numbers. |
+| `M2_LOAD_LABEL` | `M2` | Prefix of the captions (`M2 CPU`, `M2 RAM`). |
 
 SwiftBar has no place to set them, so put a small wrapper into the plugin folder instead of the link, for example `studio-load.15s.sh`:
 

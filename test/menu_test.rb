@@ -3,6 +3,15 @@ require_relative "test_helper"
 class MenuTest < Minitest::Test
   include TestSupport
 
+  NO_IMAGE = ->(_blocks, _dimmed) { nil }
+
+  def recording_widget(image)
+    lambda do |blocks, dimmed|
+      @widget_call = [blocks, dimmed]
+      image
+    end
+  end
+
   def snapshot(text = FIXTURE)
     M2Load::Snapshot.parse(text)
   end
@@ -11,12 +20,26 @@ class MenuTest < Minitest::Test
     menu.split("\n")
   end
 
-  def reachable(text = FIXTURE)
-    lines(M2Load::Menu.reachable("M2", snapshot(text)))
+  def reachable(text = FIXTURE, label: "M2", widget: NO_IMAGE)
+    lines(M2Load::Menu.reachable(label, snapshot(text), widget))
   end
 
-  def test_title_shows_cpu_and_memory_percent
+  def unavailable(reason = "No answer in 10 s", last_seen_at = NOW - 240, widget: NO_IMAGE)
+    lines(M2Load::Menu.unavailable("M2", reason, last_seen_at, NOW, widget))
+  end
+
+  def test_title_is_the_widget_image
+    assert_equal "| templateImage=IMG", reachable(widget: recording_widget("IMG")).first
+    assert_equal [[["M2 CPU", "23%"], ["M2 RAM", "75%"]], false], @widget_call
+  end
+
+  def test_title_falls_back_to_text_without_an_image
     assert_equal "M2 23% · 75%", reachable.first
+  end
+
+  def test_label_in_captions_is_plain
+    reachable(label: "a|b", widget: recording_widget("IMG"))
+    assert_equal ["a¦b CPU", "a¦b RAM"], @widget_call.first.map(&:first)
   end
 
   def test_dropdown_shows_cpu_load_memory_swap_and_claude
@@ -62,8 +85,13 @@ class MenuTest < Minitest::Test
     assert_equal "Refresh | refresh=true", reachable.last
   end
 
-  def test_unavailable_title_is_grey_dash
-    menu = lines(M2Load::Menu.unavailable("M2", "No answer in 10 s", NOW - 240, NOW))
+  def test_unavailable_title_is_a_dimmed_widget
+    assert_equal "| templateImage=IMG", unavailable(widget: recording_widget("IMG")).first
+    assert_equal [[["M2 CPU", "—"], ["M2 RAM", "—"]], true], @widget_call
+  end
+
+  def test_unavailable_title_falls_back_to_grey_dash
+    menu = unavailable
     assert_equal "M2 — | color=#8e8e93", menu.first
     assert_includes menu, "M2 is unavailable"
     assert_includes menu, "No answer in 10 s"
@@ -72,7 +100,7 @@ class MenuTest < Minitest::Test
   end
 
   def test_unavailable_never_seen
-    menu = lines(M2Load::Menu.unavailable("M2", "No answer in 10 s", nil, NOW))
+    menu = unavailable("No answer in 10 s", nil)
     assert_includes menu, "Never seen"
   end
 
@@ -83,12 +111,12 @@ class MenuTest < Minitest::Test
   end
 
   def test_unavailable_reason_cannot_break_swiftbar_parameters
-    menu = lines(M2Load::Menu.unavailable("M2", "bad | bash=/bin/rm", nil, NOW))
+    menu = unavailable("bad | bash=/bin/rm", nil)
     assert_includes menu, "bad ¦ bash=/bin/rm"
   end
 
   def test_non_ascii_label_from_a_us_ascii_environment
     label = "М2".b.force_encoding(Encoding::US_ASCII)
-    assert_equal "М2 — | color=#8e8e93", lines(M2Load::Menu.unavailable(label, "x", nil, NOW)).first
+    assert_equal "М2 — | color=#8e8e93", lines(M2Load::Menu.unavailable(label, "x", nil, NOW, NO_IMAGE)).first
   end
 end
