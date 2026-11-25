@@ -3,9 +3,11 @@ module M2Load
     DEFAULT_HOST = "m2".freeze
     DEFAULT_LABEL = "M2".freeze
     DEFAULT_DATA_DIR = File.join(Dir.home, "Library", "Application Support", "swiftbar-m2-load").freeze
+    UNSAFE_FILE_NAME_CHARACTERS = /[^\w.@-]/.freeze
 
-    def initialize(environment: ENV, output: $stdout, now: Time.now, command: Command.method(:run), widget: Widget.method(:render))
+    def initialize(environment: ENV, output: $stdout, now: Time.now, command: Command.method(:run), widget: Widget.method(:render), data_dir: DEFAULT_DATA_DIR)
       @environment = environment
+      @data_dir = data_dir
       @output = output
       @now = now
       @command = command
@@ -39,7 +41,7 @@ module M2Load
     end
 
     def last_seen
-      LastSeen.new(File.join(@environment["SWIFTBAR_PLUGIN_DATA_PATH"] || DEFAULT_DATA_DIR, "last_seen"))
+      LastSeen.new(File.join(@data_dir, "#{host.gsub(UNSAFE_FILE_NAME_CHARACTERS, "_")}.last_seen"))
     end
   end
 end

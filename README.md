@@ -62,7 +62,7 @@ SwiftBar has no place to set them, so put a small wrapper into the plugin folder
 M2_LOAD_HOST=studio M2_LOAD_LABEL=S exec "$HOME/swiftbar-m2-load/m2-load.15s.rb"
 ```
 
-Make it executable; several wrappers show several Macs. The time a Mac was last seen is kept in `last_seen` in SwiftBar's data folder of each plugin.
+Make it executable; several wrappers show several Macs. The time each Mac was last seen is kept in `~/Library/Application Support/swiftbar-m2-load/<host>.last_seen`. The plugin does not use SwiftBar's `SWIFTBAR_PLUGIN_DATA_PATH`: SwiftBar may put that folder inside the plugin folder, and then runs the file there as one more plugin, which shows up as an extra `?` in the menu bar.
 
 ## Development
 

@@ -3,7 +3,7 @@ require_relative "test_helper"
 class CliTest < Minitest::Test
   include TestSupport
 
-  def run_cli(environment: {}, result: nil, raises: nil, widget: ->(_blocks, _dimmed) { nil })
+  def run_cli(environment: {}, result: nil, raises: nil, widget: ->(_blocks, _dimmed) { nil }, data_dir: @dir)
     @argv = nil
     command = lambda do |argv, _timeout|
       @argv = argv
@@ -12,7 +12,7 @@ class CliTest < Minitest::Test
       result || M2Load::Command::Result.new(true, FIXTURE, "", false)
     end
     output = StringIO.new
-    status = M2Load::Cli.new(environment: { "SWIFTBAR_PLUGIN_DATA_PATH" => @dir }.merge(environment), output: output, now: NOW, command: command, widget: widget).run
+    status = M2Load::Cli.new(environment: environment, output: output, now: NOW, command: command, widget: widget, data_dir: data_dir).run
     assert_equal 0, status
     output.string.split("\n")
   end
@@ -25,13 +25,36 @@ class CliTest < Minitest::Test
     FileUtils.remove_entry(@dir)
   end
 
+  def last_seen(host)
+    M2Load::LastSeen.new(File.join(@dir, "#{host}.last_seen"))
+  end
+
   def test_shows_the_load_and_remembers_when_it_was_seen
     assert_equal "M2 23% · 75%", run_cli.first
-    assert_equal NOW, M2Load::LastSeen.new(File.join(@dir, "last_seen")).read
+    assert_equal NOW, last_seen("m2").read
+  end
+
+  def test_each_host_remembers_when_it_was_seen
+    run_cli(environment: { "M2_LOAD_HOST" => "me@studio.local" })
+    assert_equal NOW, last_seen("me@studio.local").read
+    assert_nil last_seen("m2").read
+  end
+
+  def test_a_host_cannot_point_last_seen_outside_the_data_folder
+    run_cli(environment: { "M2_LOAD_HOST" => "../studio" })
+    assert_equal NOW, last_seen(".._studio").read
+  end
+
+  def test_last_seen_stays_out_of_the_swiftbar_data_folder_since_swiftbar_runs_every_file_under_its_plugin_folder
+    swiftbar_data = Dir.mktmpdir
+    run_cli(environment: { "SWIFTBAR_PLUGIN_DATA_PATH" => swiftbar_data })
+    assert_empty Dir.children(swiftbar_data)
+  ensure
+    FileUtils.remove_entry(swiftbar_data)
   end
 
   def test_unavailable_shows_when_it_was_last_seen
-    M2Load::LastSeen.new(File.join(@dir, "last_seen")).write(NOW - 240)
+    last_seen("m2").write(NOW - 240)
     menu = run_cli(result: M2Load::Command::Result.new(false, "", "ssh: connect to host m2 port 22: No route to host\n", false))
     assert_equal "M2 — | color=#8e8e93", menu.first
     assert_includes menu, "Last seen 4 min ago"
@@ -61,7 +84,7 @@ class CliTest < Minitest::Test
   end
 
   def test_an_unwritable_data_folder_does_not_break_the_menu
-    menu = run_cli(environment: { "SWIFTBAR_PLUGIN_DATA_PATH" => "/dev/null/nowhere" })
+    menu = run_cli(data_dir: "/dev/null/nowhere")
     assert_equal "M2 23% · 75%", menu.first
   end
 end
