@@ -1,5 +1,4 @@
 require_relative "test_helper"
-require "base64"
 require "zlib"
 
 class WidgetTest < Minitest::Test
@@ -44,6 +43,15 @@ class WidgetTest < Minitest::Test
     assert_nil render(printed(""))
   end
 
+  def test_output_that_is_not_a_png_gives_no_image
+    assert_nil render(printed("null\n"))
+  end
+
+  def test_an_error_while_rendering_gives_no_image
+    failing = ->(_argv, _timeout) { raise ThreadError, "can't create Thread" }
+    assert_nil M2Load::Widget.render(BLOCKS, false, command: failing)
+  end
+
   def test_real_render_has_a_stable_size
     skip "no osascript" unless File.executable?(OSASCRIPT)
 
@@ -77,7 +85,7 @@ class WidgetTest < Minitest::Test
 
   def png(image)
     refute_nil image
-    Base64.strict_decode64(image)
+    image.unpack1("m0")
   end
 
   def pixel_size(png)

@@ -27,7 +27,9 @@ One `ssh` call per refresh runs `top`, `vm_stat`, `sysctl` and `ps` on the other
 - Top CPU comes from the same `top` sample (its own `top` process is left out); process names come from `ps`.
 - Top memory is by resident size from `ps`.
 
-SwiftBar titles are one line, so the two-line title is drawn as an image: `osascript` runs `lib/m2_load/widget.js`, which draws the text with AppKit in the system font, with the sizes of Stats' mini widget. The image is a template, so macOS colours it for a light or dark menu bar. Each block is as wide as `100%`, so the item does not jump as values change. If drawing fails, the title falls back to text: `M2 23% · 75%`, or a grey `M2 —`.
+## How the title is drawn
+
+SwiftBar titles are one line, so the two-line title is an image: `osascript` runs `lib/m2_load/widget.js`, which draws the text with AppKit in the system font, with the sizes of Stats' mini widget. The image is a template, so macOS colours it for a light or dark menu bar. Each block is at least as wide as `100%`, so the item does not jump as values change. If drawing fails, the title falls back to text: `M2 23% · 75%`, or a grey `M2 —`.
 
 ## Install
 

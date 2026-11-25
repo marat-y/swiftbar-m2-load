@@ -38,8 +38,8 @@ class MenuTest < Minitest::Test
   end
 
   def test_label_in_captions_is_plain
-    reachable(label: "a|b", widget: recording_widget("IMG"))
-    assert_equal ["a¦b CPU", "a¦b RAM"], @widget_call.first.map(&:first)
+    reachable(label: "a\tb|c", widget: recording_widget("IMG"))
+    assert_equal ["a b¦c CPU", "a b¦c RAM"], @widget_call.first.map(&:first)
   end
 
   def test_dropdown_shows_cpu_load_memory_swap_and_claude

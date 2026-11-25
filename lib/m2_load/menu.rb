@@ -18,9 +18,9 @@ module M2Load
       [
         title(widget, blocks(label, cpu, memory), false) || "#{plain(label)} #{cpu} · #{memory}",
         SEPARATOR,
-        "CPU #{snapshot.cpu_percent.round}% · user #{format('%.1f', snapshot.cpu_user)}% · system #{format('%.1f', snapshot.cpu_system)}%",
+        "CPU #{cpu} · user #{format('%.1f', snapshot.cpu_user)}% · system #{format('%.1f', snapshot.cpu_system)}%",
         "Load average #{snapshot.load_average.map { |value| format('%.2f', value) }.join(' · ')} · #{snapshot.cores} cores",
-        "Memory #{gigabytes(snapshot.memory_used)} of #{gigabytes(snapshot.memory_total)} GB · #{snapshot.memory_percent.round}%",
+        "Memory #{gigabytes(snapshot.memory_used)} of #{gigabytes(snapshot.memory_total)} GB · #{memory}",
         pressure_line(snapshot.pressure),
         "Swap #{gigabytes(snapshot.swap_used)} of #{gigabytes(snapshot.swap_total)} GB",
         "Claude processes: #{snapshot.claude_count}",
